@@ -1,0 +1,650 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  SALES_MANAGER
+  SALES_REP
+  DEVELOPER
+  CLIENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum CompanyStatus {
+  ACTIVE
+  INACTIVE
+  PROSPECT
+  CLIENT
+  ARCHIVED
+}
+
+enum ContactStatus {
+  ACTIVE
+  INACTIVE
+  PROSPECT
+  CLIENT
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  VIEWED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CANCELLED
+}
+
+enum QuotePriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+  ARCHIVED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  IMPORT
+}
+
+// ============================================================================
+// CORE ENTITIES
+// ============================================================================
+
+model User {
+  id                    String     @id @default(uuid())
+  email                 String     @unique
+  firstName             String
+  lastName              String
+  password              String
+  role                  UserRole   @default(SALES_REP)
+  status                UserStatus @default(PENDING_VERIFICATION)
+  emailVerified         Boolean    @default(false)
+  emailVerifiedAt       DateTime?
+  lastLoginAt           DateTime?
+  failedLoginAttempts   Int        @default(0)
+  lockedUntil           DateTime?
+  refreshToken          String?
+  refreshTokenExpiresAt DateTime?
+  profilePicture        String?
+  phone                 String?
+  timezone              String     @default("UTC")
+  language              String     @default("es")
+  twoFactorEnabled      Boolean    @default(false)
+  twoFactorSecret       String?
+
+  // Social Login
+  googleId   String? @unique
+  linkedinId String? @unique
+
+  // GDPR Compliance
+  dataConsentGiven  Boolean   @default(false)
+  dataConsentDate   DateTime?
+  dataRetentionDate DateTime?
+
+  // Audit
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  teams                UserTeam[]
+  assignedQuotes       Quote[]        @relation("QuoteAssignee")
+  createdQuotes        Quote[]        @relation("QuoteCreator")
+  createdProjects      Project[]      @relation("ProjectCreator")
+  createdInvoices      Invoice[]      @relation("InvoiceCreator")
+  createdQuoteVersions QuoteVersion[] @relation("QuoteVersionCreator")
+  assignedContacts     Contact[]      @relation("ContactAssignee")
+  assignedTasks        Task[]         @relation("TaskAssignee")
+  timeEntries          TimeEntry[]
+  auditLogs            AuditLog[]
+  notifications        Notification[]
+  tasks                Task[]
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@index([companyId])
+  @@map("users")
+}
+
+model Company {
+  id        String        @id @default(uuid())
+  name      String
+  legalName String?
+  taxId     String?       @unique
+  status    CompanyStatus @default(PROSPECT)
+
+  // Address Information
+  address    String?
+  city       String?
+  state      String?
+  postalCode String?
+  country    String?
+
+  // Contact Information
+  email   String?
+  phone   String?
+  website String?
+
+  // Financial Information
+  paymentTerms Int    @default(30) // days
+  currency     String @default("USD")
+  taxRate      Float  @default(0.18)
+
+  // Relations
+  users    User[]
+  contacts Contact[]
+  quotes   Quote[]
+  projects Project[]
+  invoices Invoice[]
+
+  // Audit
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([name])
+  @@index([status])
+  @@index([taxId])
+  @@map("companies")
+}
+
+model Contact {
+  id        String        @id @default(uuid())
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  position  String?
+  status    ContactStatus @default(PROSPECT)
+
+  // Address Information
+  address    String?
+  city       String?
+  state      String?
+  postalCode String?
+  country    String?
+
+  // Company Relationship
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Lead Information
+  source       String? // How they found us
+  assignedToId String?
+  assignedTo   User?   @relation("ContactAssignee", fields: [assignedToId], references: [id])
+
+  // Audit
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([email])
+  @@index([status])
+  @@index([assignedToId])
+  @@map("contacts")
+}
+
+// ============================================================================
+// SALES & QUOTES
+// ============================================================================
+
+model Quote {
+  id          String        @id @default(uuid())
+  quoteNumber String        @unique
+  title       String
+  description String?
+  status      QuoteStatus   @default(DRAFT)
+  priority    QuotePriority @default(MEDIUM)
+
+  // Financial Information
+  subtotal       Float
+  taxAmount      Float @default(0)
+  discountAmount Float @default(0)
+  totalAmount    Float
+
+  // Dates
+  validUntil DateTime?
+  sentAt     DateTime?
+  viewedAt   DateTime?
+  acceptedAt DateTime?
+  rejectedAt DateTime?
+  expiredAt  DateTime?
+
+  // Client Information
+  clientId String
+  client   Company @relation(fields: [clientId], references: [id])
+
+  // Assignment
+  assignedToId String
+  assignedTo   User   @relation("QuoteAssignee", fields: [assignedToId], references: [id])
+  createdById  String
+  createdBy    User   @relation("QuoteCreator", fields: [createdById], references: [id])
+
+  // Relations
+  items    QuoteItem[]
+  versions QuoteVersion[]
+  project  Project?
+  invoices Invoice[]
+
+  // Audit
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([quoteNumber])
+  @@index([status])
+  @@index([clientId])
+  @@index([assignedToId])
+  @@index([createdById])
+  @@index([validUntil])
+  @@map("quotes")
+}
+
+model QuoteItem {
+  id      String @id @default(uuid())
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  description String
+  quantity    Float  @default(1)
+  unitPrice   Float
+  unit        String @default("unit")
+  discount    Float  @default(0)
+  taxRate     Float  @default(0.18)
+
+  totalPrice Float
+
+  // Optional service reference
+  serviceId String?
+
+  // Order for display
+  order Int @default(0)
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([quoteId])
+  @@map("quote_items")
+}
+
+model QuoteVersion {
+  id            String @id @default(uuid())
+  quoteId       String
+  quote         Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  versionNumber Int
+
+  // Snapshot of quote data
+  title       String
+  description String?
+  subtotal    Float
+  taxAmount   Float
+  totalAmount Float
+  items       Json // Serialized items for versioning
+
+  createdById String
+  createdBy   User     @relation("QuoteVersionCreator", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([quoteId])
+  @@map("quote_versions")
+}
+
+// ============================================================================
+// PROJECTS & TASKS
+// ============================================================================
+
+model Project {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  status      ProjectStatus @default(PLANNING)
+
+  // Financial Information
+  budget         Float?
+  hourlyRate     Float?
+  estimatedHours Float?
+  actualHours    Float  @default(0)
+
+  // Dates
+  startDate   DateTime?
+  dueDate     DateTime?
+  completedAt DateTime?
+
+  // Relationships
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id])
+  quoteId     String? @unique
+  quote       Quote?  @relation(fields: [quoteId], references: [id])
+  createdById String
+  createdBy   User    @relation("ProjectCreator", fields: [createdById], references: [id])
+
+  // Relations
+  tasks       Task[]
+  timeEntries TimeEntry[]
+
+  // Audit
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  invoices  Invoice[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([quoteId])
+  @@map("projects")
+}
+
+model Task {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+  status      String  @default("todo") // todo, in_progress, done
+  priority    String  @default("medium") // low, medium, high, urgent
+
+  estimatedHours Float?
+  actualHours    Float  @default(0)
+
+  dueDate     DateTime?
+  completedAt DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  assignedToId String?
+  assignedTo   User?   @relation("TaskAssignee", fields: [assignedToId], references: [id])
+
+  // Order for display
+  order Int @default(0)
+
+  // Audit
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@index([projectId])
+  @@index([assignedToId])
+  @@index([status])
+  @@map("tasks")
+}
+
+model TimeEntry {
+  id          String  @id @default(uuid())
+  description String?
+  hours       Float
+  hourlyRate  Float?
+
+  date DateTime @default(now())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([date])
+  @@map("time_entries")
+}
+
+// ============================================================================
+// INVOICING
+// ============================================================================
+
+model Invoice {
+  id            String        @id @default(uuid())
+  invoiceNumber String        @unique
+  status        InvoiceStatus @default(DRAFT)
+
+  // Financial Information
+  subtotal       Float
+  taxAmount      Float @default(0)
+  discountAmount Float @default(0)
+  totalAmount    Float
+  paidAmount     Float @default(0)
+  dueAmount      Float
+
+  // Dates
+  issueDate DateTime  @default(now())
+  dueDate   DateTime
+  paidDate  DateTime?
+
+  // Client Information
+  clientId String
+  client   Company @relation(fields: [clientId], references: [id])
+
+  // Quote Reference (optional)
+  quoteId String?
+  quote   Quote?  @relation(fields: [quoteId], references: [id])
+
+  // Project Reference (optional)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+
+  // Creator
+  createdById String
+  createdBy   User   @relation("InvoiceCreator", fields: [createdById], references: [id])
+
+  // Relations
+  items    InvoiceItem[]
+  payments Payment[]
+
+  // Audit
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([invoiceNumber])
+  @@index([status])
+  @@index([clientId])
+  @@index([dueDate])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id        String  @id @default(uuid())
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  description String
+  quantity    Float  @default(1)
+  unitPrice   Float
+  discount    Float  @default(0)
+  taxRate     Float  @default(0.18)
+
+  totalPrice Float
+
+  // Order for display
+  order Int @default(0)
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+model Payment {
+  id            String  @id @default(uuid())
+  amount        Float
+  paymentMethod String // bank_transfer, credit_card, paypal, etc.
+  transactionId String?
+  notes         String?
+
+  date DateTime @default(now())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([invoiceId])
+  @@map("payments")
+}
+
+// ============================================================================
+// USER MANAGEMENT
+// ============================================================================
+
+model Team {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+
+  // Relations
+  users UserTeam[]
+
+  // Audit
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([name])
+  @@map("teams")
+}
+
+model UserTeam {
+  userId String
+  teamId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+  role     String   @default("member") // member, lead, admin
+
+  @@id([userId, teamId])
+  @@map("user_teams")
+}
+
+// ============================================================================
+// AUDIT & COMPLIANCE
+// ============================================================================
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  action     AuditAction
+  entityType String // User, Company, Quote, etc.
+  entityId   String
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?
+  userAgent  String?
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================================================
+// NOTIFICATIONS
+// ============================================================================
+
+model Notification {
+  id      String    @id @default(uuid())
+  title   String
+  message String
+  type    String // email, push, in_app
+  read    Boolean   @default(false)
+  readAt  DateTime?
+
+  // Entity reference
+  entityType String?
+  entityId   String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Scheduled delivery
+  scheduledAt DateTime?
+  sentAt      DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([read])
+  @@index([scheduledAt])
+  @@map("notifications")
+}
+
+// ============================================================================
+// SYSTEM CONFIGURATION
+// ============================================================================
+
+model SystemSetting {
+  id          String  @id @default(uuid())
+  key         String  @unique
+  value       String
+  description String?
+  type        String  @default("string") // string, number, boolean, json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@map("system_settings")
+}
