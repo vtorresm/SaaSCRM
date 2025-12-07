@@ -72,11 +72,11 @@ backend/src/
 - [x] Basic dashboard with metrics
 - [x] API endpoints for CRM functionality
 
-### 📋 Sprint 3 (Semana 3): MVP Quote System
-- [ ] Basic quote creation form
-- [ ] Simple PDF generation
-- [ ] Email template system
-- [ ] Quote management interface
+### ✅ Sprint 3 (Semana 3): MVP Quote System - **COMPLETADO**
+- [x] Basic quote creation form
+- [x] Simple PDF generation
+- [x] Email template system
+- [x] Quote management interface
 
 ### 👥 Sprint 4 (Semana 4): User Management
 - [ ] User profiles and settings
@@ -260,6 +260,29 @@ La documentación de la API está disponible en:
 #### Authentication
 
 #### Companies (Nuevo en Sprint 2)
+
+#### Quotes (Nuevo en Sprint 3)
+```bash
+POST   /api/v1/quotes              # Crear cotización
+GET    /api/v1/quotes              # Listar todas las cotizaciones
+GET    /api/v1/quotes/:id          # Obtener cotización por ID
+PUT    /api/v1/quotes/:id          # Actualizar cotización
+DELETE /api/v1/quotes/:id          # Eliminar cotización (soft delete)
+GET    /api/v1/quotes/company/:companyId # Cotizaciones por empresa
+GET    /api/v1/quotes/status/:status # Filtrar por estado
+GET    /api/v1/quotes/search?q=query # Buscar cotizaciones
+POST   /api/v1/quotes/:id/version   # Crear versión de cotización
+POST   /api/v1/quotes/:id/send     # Enviar cotización
+GET    /api/v1/quotes/:id/pdf       # Generar PDF de cotización
+```
+
+#### Quote Emails (Nuevo en Sprint 3)
+```bash
+POST   /api/v1/quote-emails/:quoteId/send    # Enviar email de cotización
+POST   /api/v1/quote-emails/:quoteId/preview # Previsualizar email
+```
+
+#### Companies (Nuevo en Sprint 2)
 ```bash
 POST   /api/v1/companies              # Crear empresa
 GET    /api/v1/companies              # Listar todas las empresas
@@ -351,7 +374,7 @@ docker-compose down -v --remove-orphans
 
 ## 🚦 Estado del Proyecto
 
-**Desarrollo en curso** - Sprint 2 (Core CRM) ✅ **100% COMPLETADO**
+**Desarrollo en curso** - Sprint 3 (MVP Quote System) ✅ **100% COMPLETADO**
 
 ### ✅ Sprint 1 - Completado
 - Sistema de autenticación JWT completo
@@ -369,12 +392,24 @@ docker-compose down -v --remove-orphans
 - Pruebas automatizadas para servicios principales
 - Integración completa con Swagger para documentación API
 
+### ✅ Sprint 3 - Completado
+- Sistema completo de gestión de cotizaciones (CRUD)
+- Cálculo automático de totales (subtotal, impuestos, descuentos)
+- Generación de números de cotización únicos (QTE-YYMM-XXXX)
+- Sistema de versiones para historial de cotizaciones
+- Generación de PDFs básica para cotizaciones
+- Sistema de plantillas de email profesional (creación, recordatorio, seguimiento)
+- 12 endpoints API para gestión completa de cotizaciones
+- Integración completa con módulos Companies y Contacts
+- Dashboard actualizado con métricas de cotizaciones
+- Pruebas automatizadas completas para todos los servicios
+
 ### 🔄 Próximos Pasos
-1. Iniciar Sprint 3 (MVP Quote System)
-2. Desarrollar sistema de cotizaciones básico
-3. Implementar generación de PDFs
-4. Crear sistema de plantillas de email
-5. Desarrollar interfaz de gestión de cotizaciones
+1. Iniciar Sprint 4 (User Management)
+2. Desarrollar sistema de perfiles de usuario
+3. Implementar gestión de equipos y roles
+4. Crear sistema de reportes básicos
+5. Desarrollar interfaz de administración
 
 ## 🛠️ Troubleshooting
 

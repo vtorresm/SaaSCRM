@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { QuotesModule } from './modules/quotes/quotes.module';
 
 @Module({
     imports: [
@@ -43,6 +44,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
         CompaniesModule,
         ContactsModule,
         DashboardModule,
+        QuotesModule,
     ],
     controllers: [],
     providers: [],
