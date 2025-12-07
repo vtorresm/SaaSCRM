@@ -78,11 +78,11 @@ backend/src/
 - [x] Email template system
 - [x] Quote management interface
 
-### 👥 Sprint 4 (Semana 4): User Management
-- [ ] User profiles and settings
-- [ ] Team and role management
-- [ ] Basic reporting system
-- [ ] Admin interface
+### ✅ Sprint 4 (Semana 4): User Management - **COMPLETADO**
+- [x] User profiles and settings
+- [x] Team and role management
+- [x] Basic reporting system
+- [x] Admin interface
 
 ## 🚀 Instalación y Configuración
 
@@ -311,6 +311,45 @@ GET    /api/v1/dashboard/metrics        # Métricas del dashboard
 GET    /api/v1/dashboard/recent-activities # Actividades recientes
 ```
 
+#### Users (Nuevo en Sprint 4)
+```bash
+POST   /api/v1/users                    # Crear usuario
+GET    /api/v1/users                    # Listar usuarios
+GET    /api/v1/users/:id                # Obtener usuario
+PUT    /api/v1/users/:id                # Actualizar usuario
+DELETE /api/v1/users/:id                # Eliminar usuario
+GET    /api/v1/users/email/:email        # Obtener usuario por email
+GET    /api/v1/users/company/:companyId  # Usuarios por empresa
+GET    /api/v1/users/role/:role          # Usuarios por rol
+GET    /api/v1/users/search?q=query     # Buscar usuarios
+PUT    /api/v1/users/:id/profile         # Actualizar perfil
+PUT    /api/v1/users/:id/password        # Actualizar contraseña
+GET    /api/v1/users/stats              # Estadísticas de usuarios
+GET    /api/v1/users/:id/activity        # Actividad de usuario
+```
+
+#### Teams (Nuevo en Sprint 4)
+```bash
+POST   /api/v1/teams                    # Crear equipo
+GET    /api/v1/teams                    # Listar equipos
+GET    /api/v1/teams/:id                # Obtener equipo
+PUT    /api/v1/teams/:id                # Actualizar equipo
+DELETE /api/v1/teams/:id                # Eliminar equipo
+POST   /api/v1/teams/:id/users           # Añadir usuario a equipo
+DELETE /api/v1/teams/:id/users/:userId  # Eliminar usuario de equipo
+GET    /api/v1/teams/user/:userId       # Equipos por usuario
+GET    /api/v1/teams/stats              # Estadísticas de equipos
+```
+
+#### Reports (Nuevo en Sprint 4)
+```bash
+GET    /api/v1/reports/users            # Reporte de usuarios
+GET    /api/v1/reports/companies        # Reporte de empresas
+GET    /api/v1/reports/sales            # Reporte de ventas
+GET    /api/v1/reports/system           # Reporte de sistema
+POST   /api/v1/reports/custom          # Reporte personalizado
+```
+
 #### Authentication
 ```
 POST   /api/v1/auth/register
@@ -374,7 +413,7 @@ docker-compose down -v --remove-orphans
 
 ## 🚦 Estado del Proyecto
 
-**Desarrollo en curso** - Sprint 3 (MVP Quote System) ✅ **100% COMPLETADO**
+**Desarrollo en curso** - Sprint 4 (User Management) ✅ **100% COMPLETADO**
 
 ### ✅ Sprint 1 - Completado
 - Sistema de autenticación JWT completo
@@ -404,12 +443,23 @@ docker-compose down -v --remove-orphans
 - Dashboard actualizado con métricas de cotizaciones
 - Pruebas automatizadas completas para todos los servicios
 
+### ✅ Sprint 4 - Completado
+- Sistema completo de gestión de usuarios (CRUD)
+- Gestión de perfiles de usuario y configuraciones
+- Sistema de equipos con asignación de roles
+- Sistema de reportes básicos (usuarios, empresas, ventas)
+- Interfaz de administración completa
+- 25+ endpoints API para gestión de usuarios y equipos
+- Integración con módulos existentes (Auth, Companies, Dashboard)
+- Pruebas automatizadas completas para todos los servicios
+- Documentación completa de API con Swagger
+
 ### 🔄 Próximos Pasos
-1. Iniciar Sprint 4 (User Management)
-2. Desarrollar sistema de perfiles de usuario
-3. Implementar gestión de equipos y roles
-4. Crear sistema de reportes básicos
-5. Desarrollar interfaz de administración
+1. Iniciar Sprint 5 (Advanced Features)
+2. Implementar sistema de auditoría completo
+3. Desarrollar sistema de notificaciones
+4. Crear sistema de facturación avanzado
+5. Implementar integración con sistemas externos
 
 ## 🛠️ Troubleshooting
 

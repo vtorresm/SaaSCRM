@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../config/prisma.service';
-import { CreateCompanyDto, UpdateCompanyDto } from './dto';
+import { CreateCompanyDto } from './dto/create-company.dto';
+import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @Injectable()
 export class CompaniesService {
@@ -19,6 +20,7 @@ export class CompaniesService {
             },
             include: {
                 contacts: true,
+                quotes: true,
             },
         });
     }
