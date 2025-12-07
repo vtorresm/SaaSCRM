@@ -8,6 +8,11 @@ import { PrismaModule } from './config/prisma.module';
 // Auth module
 import { AuthModule } from './modules/auth/auth.module';
 
+// CRM Modules
+import { CompaniesModule } from './modules/companies/companies.module';
+import { ContactsModule } from './modules/contacts/contacts.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+
 @Module({
     imports: [
         // Configuration
@@ -33,6 +38,11 @@ import { AuthModule } from './modules/auth/auth.module';
 
         // Auth module
         AuthModule,
+
+        // CRM Modules
+        CompaniesModule,
+        ContactsModule,
+        DashboardModule,
     ],
     controllers: [],
     providers: [],

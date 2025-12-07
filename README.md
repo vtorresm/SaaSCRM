@@ -66,11 +66,11 @@ backend/src/
 - [x] Rate limiting y account lockout
 - [x] **Docker setup completo (PostgreSQL, Redis, MinIO)**
 
-### 🔄 Sprint 2 (Semana 2): Core CRM
-- [ ] Database schema implementation
-- [ ] Company and contact CRUD operations
-- [ ] Basic dashboard with metrics
-- [ ] API endpoints for CRM functionality
+### ✅ Sprint 2 (Semana 2): Core CRM - **COMPLETADO**
+- [x] Database schema implementation
+- [x] Company and contact CRUD operations
+- [x] Basic dashboard with metrics
+- [x] API endpoints for CRM functionality
 
 ### 📋 Sprint 3 (Semana 3): MVP Quote System
 - [ ] Basic quote creation form
@@ -258,6 +258,37 @@ La documentación de la API está disponible en:
 ### Endpoints Principales
 
 #### Authentication
+
+#### Companies (Nuevo en Sprint 2)
+```bash
+POST   /api/v1/companies              # Crear empresa
+GET    /api/v1/companies              # Listar todas las empresas
+GET    /api/v1/companies/:id          # Obtener empresa por ID
+PUT    /api/v1/companies/:id          # Actualizar empresa
+DELETE /api/v1/companies/:id          # Eliminar empresa (soft delete)
+GET    /api/v1/companies/status/:status # Filtrar por estado
+GET    /api/v1/companies/search?q=query # Búsqueda de empresas
+```
+
+#### Contacts (Nuevo en Sprint 2)
+```bash
+POST   /api/v1/contacts               # Crear contacto
+GET    /api/v1/contacts               # Listar todos los contactos
+GET    /api/v1/contacts/:id           # Obtener contacto por ID
+PUT    /api/v1/contacts/:id           # Actualizar contacto
+DELETE /api/v1/contacts/:id           # Eliminar contacto (soft delete)
+GET    /api/v1/contacts/company/:companyId # Contactos por empresa
+GET    /api/v1/contacts/status/:status # Filtrar por estado
+GET    /api/v1/contacts/search?q=query # Búsqueda de contactos
+```
+
+#### Dashboard (Nuevo en Sprint 2)
+```bash
+GET    /api/v1/dashboard/metrics        # Métricas del dashboard
+GET    /api/v1/dashboard/recent-activities # Actividades recientes
+```
+
+#### Authentication
 ```
 POST   /api/v1/auth/register
 POST   /api/v1/auth/login
@@ -320,7 +351,7 @@ docker-compose down -v --remove-orphans
 
 ## 🚦 Estado del Proyecto
 
-**Desarrollo en curso** - Sprint 1 (Authentication & Authorization) ✅ **100% COMPLETADO**
+**Desarrollo en curso** - Sprint 2 (Core CRM) ✅ **100% COMPLETADO**
 
 ### ✅ Sprint 1 - Completado
 - Sistema de autenticación JWT completo
@@ -330,12 +361,20 @@ docker-compose down -v --remove-orphans
 - **Docker setup completo**
 - **Prisma schema con 20+ entidades**
 
+### ✅ Sprint 2 - Completado
+- Implementación completa del esquema de base de datos
+- Módulo Companies con CRUD completo y endpoints API
+- Módulo Contacts con CRUD completo y endpoints API
+- Dashboard básico con métricas y actividades recientes
+- Pruebas automatizadas para servicios principales
+- Integración completa con Swagger para documentación API
+
 ### 🔄 Próximos Pasos
-1. Iniciar Sprint 2 (Core CRM)
-2. Desarrollar módulos de Companies y Contacts
-3. Crear dashboard básico
-4. Implementar frontend
-5. Tests automatizados
+1. Iniciar Sprint 3 (MVP Quote System)
+2. Desarrollar sistema de cotizaciones básico
+3. Implementar generación de PDFs
+4. Crear sistema de plantillas de email
+5. Desarrollar interfaz de gestión de cotizaciones
 
 ## 🛠️ Troubleshooting
 

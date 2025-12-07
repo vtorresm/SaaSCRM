@@ -137,13 +137,13 @@ Day 3-4: JWT implementation with refresh tokens
 Day 5: RBAC system implementation
 ```
 
-**Sprint 2 (Week 2): Core CRM**
-```
-Day 1-2: Database schema implementation
-Day 3-4: Company and contact CRUD
-Day 5: Basic dashboard with metrics
+**Sprint 2 (Week 2): Core CRM - COMPLETED ✅**
 ```
 
+Day 1-2: Database schema implementation ✅ COMPLETED
+Day 3-4: Company and contact CRUD ✅ COMPLETED
+Day 5: Basic dashboard with metrics ✅ COMPLETED
+```
 **Sprint 3 (Week 3): MVP Quote System**
 ```
 Day 1-2: Basic quote creation form
