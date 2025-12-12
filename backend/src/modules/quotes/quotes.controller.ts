@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { QuotesService } from './quotes.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
+import { UpdateQuoteStatusDto } from './dto/update-quote-status.dto';
 import { UpdateQuoteDto } from './dto/update-quote.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('quotes')
 @Controller('quotes')
@@ -23,25 +24,12 @@ export class QuotesController {
         return this.quotesService.findAll();
     }
 
-    @Get(':id')
-    @ApiOperation({ summary: 'Get quote by ID' })
-    @ApiResponse({ status: 200, description: 'Quote details' })
-    async findOne(@Param('id') id: string) {
-        return this.quotesService.findOne(id);
-    }
-
-    @Put(':id')
-    @ApiOperation({ summary: 'Update quote' })
-    @ApiResponse({ status: 200, description: 'Quote updated successfully' })
-    async update(@Param('id') id: string, @Body() updateQuoteDto: UpdateQuoteDto) {
-        return this.quotesService.update(id, updateQuoteDto);
-    }
-
-    @Delete(':id')
-    @ApiOperation({ summary: 'Delete quote (soft delete)' })
-    @ApiResponse({ status: 200, description: 'Quote deleted successfully' })
-    async remove(@Param('id') id: string) {
-        return this.quotesService.remove(id);
+    // IMPORTANT: mantener rutas estáticas/semánticas antes de ':id' para evitar colisiones
+    @Get('search')
+    @ApiOperation({ summary: 'Search quotes' })
+    @ApiResponse({ status: 200, description: 'Search results' })
+    async search(@Query('q') query: string) {
+        return this.quotesService.search(query);
     }
 
     @Get('company/:companyId')
@@ -58,11 +46,32 @@ export class QuotesController {
         return this.quotesService.findByStatus(status);
     }
 
-    @Get('search')
-    @ApiOperation({ summary: 'Search quotes' })
-    @ApiResponse({ status: 200, description: 'Search results' })
-    async search(@Query('q') query: string) {
-        return this.quotesService.search(query);
+    @Get(':id')
+    @ApiOperation({ summary: 'Get quote by ID' })
+    @ApiResponse({ status: 200, description: 'Quote details' })
+    async findOne(@Param('id') id: string) {
+        return this.quotesService.findOne(id);
+    }
+
+    @Put(':id')
+    @ApiOperation({ summary: 'Update quote' })
+    @ApiResponse({ status: 200, description: 'Quote updated successfully' })
+    async update(@Param('id') id: string, @Body() updateQuoteDto: UpdateQuoteDto) {
+        return this.quotesService.update(id, updateQuoteDto);
+    }
+
+    @Patch(':id/status')
+    @ApiOperation({ summary: 'Update quote status (pipeline)' })
+    @ApiResponse({ status: 200, description: 'Quote status updated successfully' })
+    async updateStatus(@Param('id') id: string, @Body() dto: UpdateQuoteStatusDto) {
+        return this.quotesService.updateStatus(id, dto.status);
+    }
+
+    @Delete(':id')
+    @ApiOperation({ summary: 'Delete quote (soft delete)' })
+    @ApiResponse({ status: 200, description: 'Quote deleted successfully' })
+    async remove(@Param('id') id: string) {
+        return this.quotesService.remove(id);
     }
 
     @Post(':id/version')
