@@ -13,6 +13,7 @@ import { CompaniesModule } from './modules/companies/companies.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { QuotesModule } from './modules/quotes/quotes.module';
+import { InvoicesModule } from './modules/invoices/invoices.module';
 import { UsersModule } from './modules/users/users.module';
 import { TeamsModule } from './modules/teams/teams.module';
 import { ReportsModule } from './modules/reports/reports.module';
@@ -48,6 +49,7 @@ import { ReportsModule } from './modules/reports/reports.module';
         ContactsModule,
         DashboardModule,
         QuotesModule,
+        InvoicesModule,
         UsersModule,
         TeamsModule,
         ReportsModule,
