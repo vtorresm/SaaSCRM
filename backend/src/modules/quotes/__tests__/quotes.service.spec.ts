@@ -284,4 +284,91 @@ describe('QuotesService', () => {
             await expect(service.createVersion('non-existent', 'user-id')).rejects.toThrow(NotFoundException);
         });
     });
+
+    describe('Status convenience methods (Sprint 5)', () => {
+        it('should mark quote as viewed', async () => {
+            const quoteId = 'test-quote-id';
+            const existing = {
+                id: quoteId,
+                status: QuoteStatus.SENT,
+                items: [],
+                versions: [],
+            };
+
+            jest.spyOn(prismaService.quote, 'findFirst').mockResolvedValue(existing as any);
+            jest.spyOn(service, 'updateStatus').mockResolvedValue({ ...existing, status: QuoteStatus.VIEWED } as any);
+
+            const result = await service.markAsViewed(quoteId);
+            expect(service.updateStatus).toHaveBeenCalledWith(quoteId, QuoteStatus.VIEWED);
+            expect(result.status).toBe(QuoteStatus.VIEWED);
+        });
+
+        it('should accept quote', async () => {
+            const quoteId = 'test-quote-id';
+            const existing = {
+                id: quoteId,
+                status: QuoteStatus.VIEWED,
+                items: [],
+                versions: [],
+            };
+
+            jest.spyOn(prismaService.quote, 'findFirst').mockResolvedValue(existing as any);
+            jest.spyOn(service, 'updateStatus').mockResolvedValue({ ...existing, status: QuoteStatus.ACCEPTED } as any);
+
+            const result = await service.accept(quoteId);
+            expect(service.updateStatus).toHaveBeenCalledWith(quoteId, QuoteStatus.ACCEPTED);
+            expect(result.status).toBe(QuoteStatus.ACCEPTED);
+        });
+
+        it('should reject quote', async () => {
+            const quoteId = 'test-quote-id';
+            const existing = {
+                id: quoteId,
+                status: QuoteStatus.VIEWED,
+                items: [],
+                versions: [],
+            };
+
+            jest.spyOn(prismaService.quote, 'findFirst').mockResolvedValue(existing as any);
+            jest.spyOn(service, 'updateStatus').mockResolvedValue({ ...existing, status: QuoteStatus.REJECTED } as any);
+
+            const result = await service.reject(quoteId);
+            expect(service.updateStatus).toHaveBeenCalledWith(quoteId, QuoteStatus.REJECTED);
+            expect(result.status).toBe(QuoteStatus.REJECTED);
+        });
+
+        it('should expire quote', async () => {
+            const quoteId = 'test-quote-id';
+            const existing = {
+                id: quoteId,
+                status: QuoteStatus.SENT,
+                items: [],
+                versions: [],
+            };
+
+            jest.spyOn(prismaService.quote, 'findFirst').mockResolvedValue(existing as any);
+            jest.spyOn(service, 'updateStatus').mockResolvedValue({ ...existing, status: QuoteStatus.EXPIRED } as any);
+
+            const result = await service.expire(quoteId);
+            expect(service.updateStatus).toHaveBeenCalledWith(quoteId, QuoteStatus.EXPIRED);
+            expect(result.status).toBe(QuoteStatus.EXPIRED);
+        });
+
+        it('should cancel quote', async () => {
+            const quoteId = 'test-quote-id';
+            const existing = {
+                id: quoteId,
+                status: QuoteStatus.DRAFT,
+                items: [],
+                versions: [],
+            };
+
+            jest.spyOn(prismaService.quote, 'findFirst').mockResolvedValue(existing as any);
+            jest.spyOn(service, 'updateStatus').mockResolvedValue({ ...existing, status: QuoteStatus.CANCELLED } as any);
+
+            const result = await service.cancel(quoteId);
+            expect(service.updateStatus).toHaveBeenCalledWith(quoteId, QuoteStatus.CANCELLED);
+            expect(result.status).toBe(QuoteStatus.CANCELLED);
+        });
+    });
 });

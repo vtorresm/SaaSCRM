@@ -98,4 +98,42 @@ export class QuotesController {
             contentType: 'application/pdf',
         };
     }
+
+    // Endpoints de conveniencia para status tracking (Sprint 5)
+    // Mejoran la Developer Experience con URLs semánticas
+
+    @Post(':id/view')
+    @ApiOperation({ summary: 'Mark quote as viewed' })
+    @ApiResponse({ status: 200, description: 'Quote marked as viewed' })
+    async markAsViewed(@Param('id') id: string) {
+        return this.quotesService.markAsViewed(id);
+    }
+
+    @Post(':id/accept')
+    @ApiOperation({ summary: 'Accept quote' })
+    @ApiResponse({ status: 200, description: 'Quote accepted successfully' })
+    async accept(@Param('id') id: string) {
+        return this.quotesService.accept(id);
+    }
+
+    @Post(':id/reject')
+    @ApiOperation({ summary: 'Reject quote' })
+    @ApiResponse({ status: 200, description: 'Quote rejected successfully' })
+    async reject(@Param('id') id: string) {
+        return this.quotesService.reject(id);
+    }
+
+    @Post(':id/expire')
+    @ApiOperation({ summary: 'Mark quote as expired' })
+    @ApiResponse({ status: 200, description: 'Quote marked as expired' })
+    async expire(@Param('id') id: string) {
+        return this.quotesService.expire(id);
+    }
+
+    @Post(':id/cancel')
+    @ApiOperation({ summary: 'Cancel quote' })
+    @ApiResponse({ status: 200, description: 'Quote cancelled successfully' })
+    async cancel(@Param('id') id: string) {
+        return this.quotesService.cancel(id);
+    }
 }

@@ -417,4 +417,27 @@ export class QuotesService {
     async updateStatus(quoteId: string, status: QuoteStatus) {
         return this.update(quoteId, { status } as any);
     }
+
+    // Métodos de conveniencia para status tracking (Sprint 5)
+    // Estos métodos mejoran la Developer Experience con nombres semánticos
+
+    async markAsViewed(quoteId: string) {
+        return this.updateStatus(quoteId, QuoteStatus.VIEWED);
+    }
+
+    async accept(quoteId: string) {
+        return this.updateStatus(quoteId, QuoteStatus.ACCEPTED);
+    }
+
+    async reject(quoteId: string) {
+        return this.updateStatus(quoteId, QuoteStatus.REJECTED);
+    }
+
+    async expire(quoteId: string) {
+        return this.updateStatus(quoteId, QuoteStatus.EXPIRED);
+    }
+
+    async cancel(quoteId: string) {
+        return this.updateStatus(quoteId, QuoteStatus.CANCELLED);
+    }
 }
