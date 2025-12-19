@@ -44,6 +44,11 @@ export class CreateInvoiceItemDto {
     @Min(0)
     taxRate?: number;
 
+    @ApiPropertyOptional({ description: 'Tipo de impuesto', example: 'IVA_18' })
+    @IsOptional()
+    @IsString()
+    taxType?: string;
+
     @ApiPropertyOptional({ description: 'Orden del item para visualización', example: 0 })
     @IsOptional()
     @IsNumber()

@@ -13,6 +13,7 @@ type CalculatedItem = {
     unitPrice: number;
     discount: number;
     taxRate: number;
+    taxType: string;
     order: number;
     totalPrice: number;
 };
@@ -24,6 +25,12 @@ type CalculatedTotals = {
     taxAmount: number;
     totalAmount: number;
     dueAmount: number;
+};
+
+const TAX_RATES = {
+    'IVA_18': 0.18,
+    'IVA_10': 0.10,
+    'EXEMPT': 0.0,
 };
 
 @Injectable()
@@ -45,7 +52,7 @@ export class InvoicesService {
             const unitPrice = Number(item.unitPrice);
 
             const discount = Number(item.discount ?? 0);
-            const taxRate = Number(item.taxRate ?? defaultTaxRate);
+            const taxRate = TAX_RATES[item.taxType] || Number(item.taxRate ?? defaultTaxRate);
             const order = Number(item.order ?? index);
 
             const lineSubtotal = quantity * unitPrice;
@@ -64,6 +71,7 @@ export class InvoicesService {
                 unitPrice,
                 discount,
                 taxRate,
+                taxType: item.taxType || 'IVA_18',
                 order,
                 totalPrice,
             };
@@ -237,6 +245,7 @@ export class InvoicesService {
                             unitPrice: i.unitPrice,
                             discount: i.discount,
                             taxRate: i.taxRate,
+                            taxType: i.taxType,
                             order: i.order,
                             totalPrice: i.totalPrice,
                         })),
