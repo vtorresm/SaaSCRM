@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CompaniesService } from '../companies/companies.service';
 import { QuotesService } from '../quotes/quotes.service';
+import { InvoicesService } from '../invoices/invoices.service';
 
 @Injectable()
 export class ReportsService {
@@ -9,6 +10,7 @@ export class ReportsService {
         private usersService: UsersService,
         private companiesService: CompaniesService,
         private quotesService: QuotesService,
+        private invoicesService: InvoicesService,
     ) { }
 
     async generateUserReport() {
