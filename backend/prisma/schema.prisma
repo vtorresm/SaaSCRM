@@ -493,6 +493,7 @@ model Invoice {
   @@index([status])
   @@index([clientId])
   @@index([dueDate])
+  @@index([paidDate])
   @@map("invoices")
 }
 
@@ -537,6 +538,7 @@ model Payment {
   updatedAt DateTime @updatedAt
 
   @@index([invoiceId])
+  @@index([date])
   @@map("payments")
 }
 

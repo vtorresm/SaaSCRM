@@ -16,6 +16,7 @@ import { QuotesModule } from './modules/quotes/quotes.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { UsersModule } from './modules/users/users.module';
 import { TeamsModule } from './modules/teams/teams.module';
+import { EmailModule } from './modules/email/email.module';
 import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({

@@ -5,6 +5,7 @@ import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { CreateInvoiceFromQuoteDto } from './dto/create-invoice-from-quote.dto';
+import { EmailService } from '../email/email.service';
 
 type CalculatedItem = {
     description: string;
@@ -27,7 +28,7 @@ type CalculatedTotals = {
 
 @Injectable()
 export class InvoicesService {
-    constructor(private prisma: PrismaService) { }
+    constructor(private prisma: PrismaService, private emailService: EmailService) { }
 
     private calculateTotals(inputItems: CreateInvoiceDto['items'], defaultTaxRate = 0.18): CalculatedTotals {
         if (!inputItems || inputItems.length === 0) {
@@ -115,7 +116,7 @@ export class InvoicesService {
         const totals = this.calculateTotals(inputItems, taxRate ?? 0.18);
         const dueDate = new Date(rest.dueDate);
 
-        return this.prisma.invoice.create({
+        const invoice = await this.prisma.invoice.create({
             data: {
                 ...rest,
                 dueDate,
@@ -147,6 +148,15 @@ export class InvoicesService {
                 payments: true,
             },
         });
+        await this.prisma.auditLog.create({
+            data: {
+                action: 'CREATE',
+                entityType: 'Invoice',
+                entityId: invoice.id,
+                userId: invoice.createdById,
+            },
+        });
+        return invoice;
     }
 
     async findAll() {
@@ -250,6 +260,14 @@ export class InvoicesService {
             return invoice;
         });
 
+        await this.prisma.auditLog.create({
+            data: {
+                action: 'UPDATE',
+                entityType: 'Invoice',
+                entityId: id,
+                userId: existing.createdById,
+            },
+        });
         return updated;
     }
 
@@ -259,7 +277,7 @@ export class InvoicesService {
             throw new NotFoundException('Invoice not found');
         }
 
-        return this.prisma.invoice.update({
+        const result = await this.prisma.invoice.update({
             where: {
                 id,
             },
@@ -267,6 +285,15 @@ export class InvoicesService {
                 deletedAt: new Date(),
             },
         });
+        await this.prisma.auditLog.create({
+            data: {
+                action: 'DELETE',
+                entityType: 'Invoice',
+                entityId: id,
+                userId: existing.createdById,
+            },
+        });
+        return result;
     }
 
     async findByClient(clientId: string) {
@@ -369,7 +396,7 @@ export class InvoicesService {
             data.dueAmount = Math.max(0, existing.totalAmount - totalPaid);
         }
 
-        return this.prisma.invoice.update({
+        const updated = await this.prisma.invoice.update({
             where: { id },
             data,
             include: {
@@ -381,6 +408,14 @@ export class InvoicesService {
                 payments: true,
             },
         });
+        if (status === 'SENT') {
+            try {
+                await this.emailService.sendInvoice(id, updated.client.email);
+            } catch (error) {
+                console.error('Failed to send invoice email:', error);
+            }
+        }
+        return updated;
     }
 
     // Payment Management
