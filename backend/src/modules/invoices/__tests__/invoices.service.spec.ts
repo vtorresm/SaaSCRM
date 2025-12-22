@@ -33,6 +33,9 @@ describe('InvoicesService', () => {
                             findFirst: jest.fn(),
                         },
                         $transaction: jest.fn((fn) => fn(prismaService)),
+                        auditLog: {
+                            create: jest.fn(),
+                        },
                     },
                 },
             ],
@@ -96,13 +99,22 @@ describe('InvoicesService', () => {
                 taxAmount: 0,
                 discountAmount: 0,
                 totalAmount: 0,
+                paidAmount: 0,
                 dueAmount: 0,
+                issueDate: new Date(),
+                dueDate: new Date(),
+                paidDate: null,
+                clientId: 'client-id',
+                quoteId: null,
+                projectId: null,
+                createdById: 'user-id',
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                items: [],
-                client: { id: 'client-id', name: 'Client' },
-                createdBy: { id: 'user-id', firstName: 'User', lastName: 'Test' },
-                payments: [],
+                deletedAt: null,
+                items: jest.fn(),
+                client: jest.fn(),
+                createdBy: jest.fn(),
+                payments: jest.fn(),
             };
 
             jest.spyOn(prismaService.invoice, 'create').mockResolvedValue(mockCreated);
@@ -134,11 +146,18 @@ describe('InvoicesService', () => {
                 id: 'invoice-id',
                 status: InvoiceStatus.DRAFT,
                 paidAmount: 0,
-                payments: [],
+                payments: jest.fn(),
             };
 
             jest.spyOn(prismaService.invoice, 'findFirst').mockResolvedValue(existing as any);
-            jest.spyOn(prismaService.invoice, 'update').mockResolvedValue({ ...existing, status: InvoiceStatus.SENT } as any);
+            jest.spyOn(prismaService.invoice, 'update').mockResolvedValue({
+                ...existing,
+                status: InvoiceStatus.SENT,
+                items: jest.fn(),
+                client: jest.fn(),
+                createdBy: jest.fn(),
+                payments: jest.fn(),
+            } as any);
 
             const result = await service.updateStatus('invoice-id', InvoiceStatus.SENT);
 
@@ -149,10 +168,16 @@ describe('InvoicesService', () => {
             const existing = {
                 id: 'invoice-id',
                 status: InvoiceStatus.PAID,
-                payments: [],
+                payments: jest.fn(),
             };
 
-            jest.spyOn(prismaService.invoice, 'findFirst').mockResolvedValue(existing as any);
+            jest.spyOn(prismaService.invoice, 'findFirst').mockResolvedValue({
+                ...existing,
+                items: jest.fn(),
+                client: jest.fn(),
+                createdBy: jest.fn(),
+                payments: jest.fn(),
+            } as any);
 
             await expect(service.updateStatus('invoice-id', InvoiceStatus.DRAFT)).rejects.toThrow(BadRequestException);
         });
@@ -165,7 +190,7 @@ describe('InvoicesService', () => {
                 totalAmount: 1000,
                 paidAmount: 0,
                 status: InvoiceStatus.SENT,
-                payments: [],
+                payments: jest.fn(),
             };
 
             const createPaymentDto = {
@@ -175,12 +200,23 @@ describe('InvoicesService', () => {
                 notes: 'Partial payment',
             };
 
-            jest.spyOn(prismaService.invoice, 'findFirst').mockResolvedValue(invoice as any);
+            jest.spyOn(prismaService.invoice, 'findFirst').mockResolvedValue({
+                ...invoice,
+                items: jest.fn(),
+                client: jest.fn(),
+                createdBy: jest.fn(),
+                payments: jest.fn(),
+            } as any);
             jest.spyOn(prismaService.payment, 'create').mockResolvedValue({
                 id: 'payment-id',
-                ...createPaymentDto,
+                createdAt: new Date(),
+                updatedAt: new Date(),
                 date: new Date(),
                 invoiceId: 'invoice-id',
+                amount: createPaymentDto.amount,
+                paymentMethod: createPaymentDto.paymentMethod,
+                transactionId: createPaymentDto.transactionId,
+                notes: createPaymentDto.notes,
             });
 
             const result = await service.addPayment('invoice-id', createPaymentDto);
@@ -201,12 +237,12 @@ describe('InvoicesService', () => {
             const quote = {
                 id: 'quote-id',
                 quoteNumber: 'QTE-2501-0001',
-                status: InvoiceStatus.ACCEPTED,
+                status: 'ACCEPTED',
                 clientId: 'client-id',
                 items: [
                     { description: 'Service 1', quantity: 1, unitPrice: 500, discount: 0, taxRate: 0.18, order: 0, totalPrice: 590 },
                 ],
-                client: { id: 'client-id', name: 'Client' },
+                client: jest.fn(),
             };
 
             const createInvoiceFromQuoteDto = {
@@ -214,14 +250,37 @@ describe('InvoicesService', () => {
                 createdById: 'user-id',
             };
 
-            jest.spyOn(prismaService.quote, 'findFirst').mockResolvedValue(quote as any);
+            jest.spyOn(prismaService.quote, 'findFirst').mockResolvedValue({
+                ...quote,
+                items: jest.fn(),
+            } as any);
             jest.spyOn(prismaService.invoice, 'findFirst').mockResolvedValue(null); // No existing invoice
             jest.spyOn(prismaService.invoice, 'count').mockResolvedValue(0);
             jest.spyOn(prismaService.invoice, 'create').mockResolvedValue({
                 id: 'invoice-id',
                 invoiceNumber: 'INV-2501-0001',
                 status: InvoiceStatus.DRAFT,
-            } as any);
+                subtotal: 0,
+                taxAmount: 0,
+                discountAmount: 0,
+                totalAmount: 0,
+                paidAmount: 0,
+                dueAmount: 0,
+                issueDate: new Date(),
+                dueDate: new Date(),
+                paidDate: null,
+                clientId: 'client-id',
+                quoteId: null,
+                projectId: null,
+                createdById: 'user-id',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                deletedAt: null,
+                items: jest.fn(),
+                client: jest.fn(),
+                createdBy: jest.fn(),
+                payments: jest.fn(),
+            });
 
             const result = await service.createFromQuote(createInvoiceFromQuoteDto);
 
@@ -243,10 +302,10 @@ describe('InvoicesService', () => {
         it('should throw BadRequestException if invoice already exists for quote', async () => {
             const quote = {
                 id: 'quote-id',
-                status: InvoiceStatus.ACCEPTED,
+                status: 'ACCEPTED',
                 clientId: 'client-id',
                 items: [],
-                client: { id: 'client-id', name: 'Client' },
+                client: jest.fn(),
             };
 
             const createInvoiceFromQuoteDto = {
@@ -254,21 +313,48 @@ describe('InvoicesService', () => {
                 createdById: 'user-id',
             };
 
-            jest.spyOn(prismaService.quote, 'findFirst').mockResolvedValue(quote as any);
-            jest.spyOn(prismaService.invoice, 'findFirst').mockResolvedValue({ id: 'existing-invoice-id' }); // Invoice exists
+            jest.spyOn(prismaService.quote, 'findFirst').mockResolvedValue({
+                ...quote,
+                items: jest.fn(),
+            } as any);
+            jest.spyOn(prismaService.invoice, 'findFirst').mockResolvedValue({
+                id: 'existing-invoice-id',
+                invoiceNumber: 'INV-2501-0001',
+                status: InvoiceStatus.DRAFT,
+                subtotal: 0,
+                taxAmount: 0,
+                discountAmount: 0,
+                totalAmount: 0,
+                paidAmount: 0,
+                dueAmount: 0,
+                issueDate: new Date(),
+                dueDate: new Date(),
+                paidDate: null,
+                clientId: 'client-id',
+                quoteId: null,
+                projectId: null,
+                createdById: 'user-id',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                deletedAt: null,
+                items: jest.fn(),
+                client: jest.fn(),
+                createdBy: jest.fn(),
+                payments: jest.fn(),
+            }); // Invoice exists
 
             await expect(service.createFromQuote(createInvoiceFromQuoteDto)).rejects.toThrow(BadRequestException);
         });
     });
 
     describe('generateInvoiceNumber', () => {
-        it('should generate an invoice number with proper format', () => {
+        it('should generate an invoice number with proper format', async () => {
             jest.spyOn(prismaService.invoice, 'count').mockResolvedValue(5);
 
             // @ts-ignore - acceso a método privado para test
-            const result = service.generateInvoiceNumber();
+            const result = await service.generateInvoiceNumber();
             
-            expect(result).resolves.toMatch(/^INV-\d{2}\d{2}-\d{4}$/);
+            expect(result).toMatch(/^INV-\d{2}\d{2}-\d{4}$/);
         });
     });
 
@@ -285,8 +371,8 @@ describe('InvoicesService', () => {
             ] as any);
 
             jest.spyOn(prismaService.invoice, 'aggregate')
-                .mockResolvedValueOnce({ _sum: { totalAmount: 50000 } }) // totalRevenue
-                .mockResolvedValueOnce({ _sum: { dueAmount: 15000 } });  // outstandingAmount
+                .mockResolvedValueOnce({ _sum: { totalAmount: 50000 }, _count: {}, _avg: {}, _min: {}, _max: {} }) // totalRevenue
+                .mockResolvedValueOnce({ _sum: { dueAmount: 15000 }, _count: {}, _avg: {}, _min: {}, _max: {} });  // outstandingAmount
 
             const result = await service.getInvoiceStats();
 
