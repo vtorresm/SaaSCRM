@@ -63,7 +63,7 @@ export class CreateInvoiceDto {
 
     @ApiProperty({ description: 'Fecha de vencimiento (ISO 8601)', example: '2026-01-31T00:00:00.000Z' })
     @IsDateString()
-    dueDate: string;
+    dueDate!: string;
 
     @ApiPropertyOptional({ description: 'Notas adicionales', example: 'Pago a 30 días' })
     @IsOptional()
@@ -93,7 +93,7 @@ export class CreateInvoiceDto {
 
     @ApiProperty({ description: 'Empresa/cliente', example: 'b3f1d6dd-4d6c-4b66-8d85-2a2d9bb4f0d1' })
     @IsUUID()
-    clientId: string;
+    clientId!: string;
 
     @ApiPropertyOptional({ description: 'Cotización relacionada (opcional)', example: 'b3f1d6dd-4d6c-4b66-8d85-2a2d9bb4f0d1' })
     @IsOptional()
@@ -107,11 +107,11 @@ export class CreateInvoiceDto {
 
     @ApiProperty({ description: 'Usuario creador', example: 'b3f1d6dd-4d6c-4b66-8d85-2a2d9bb4f0d1' })
     @IsUUID()
-    createdById: string;
+    createdById!: string;
 
     @ApiProperty({ type: [CreateInvoiceItemDto] })
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => CreateInvoiceItemDto)
-    items: CreateInvoiceItemDto[];
+    items!: CreateInvoiceItemDto[];
 }

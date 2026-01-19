@@ -64,7 +64,7 @@ export class CreateQuoteDto {
     @IsString()
     @IsNotEmpty()
     @MinLength(2)
-    title: string;
+    title!: string;
 
     @ApiPropertyOptional({ example: 'Incluye desarrollo + QA + despliegue' })
     @IsOptional()
@@ -107,15 +107,15 @@ export class CreateQuoteDto {
 
     @ApiProperty({ description: 'Empresa/cliente', example: 'b3f1d6dd-4d6c-4b66-8d85-2a2d9bb4f0d1' })
     @IsUUID()
-    clientId: string;
+    clientId!: string;
 
     @ApiProperty({ description: 'Usuario asignado', example: 'b3f1d6dd-4d6c-4b66-8d85-2a2d9bb4f0d1' })
     @IsUUID()
-    assignedToId: string;
+    assignedToId!: string;
 
     @ApiProperty({ description: 'Usuario creador', example: 'b3f1d6dd-4d6c-4b66-8d85-2a2d9bb4f0d1' })
     @IsUUID()
-    createdById: string;
+    createdById!: string;
 
     @ApiPropertyOptional({ description: 'Fecha de validez (ISO 8601)', example: '2026-01-31T00:00:00.000Z' })
     @IsOptional()
@@ -126,5 +126,5 @@ export class CreateQuoteDto {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => CreateQuoteItemDto)
-    items: CreateQuoteItemDto[];
+    items!: CreateQuoteItemDto[];
 }

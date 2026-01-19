@@ -1,8 +1,8 @@
 import { ContactStatus } from '@prisma/client';
 
 export class CreateContactDto {
-    firstName: string;
-    lastName: string;
+    firstName!: string;
+    lastName!: string;
     email?: string;
     phone?: string;
     position?: string;
@@ -12,7 +12,7 @@ export class CreateContactDto {
     state?: string;
     postalCode?: string;
     country?: string;
-    companyId: string;
+    companyId!: string;
     source?: string;
     assignedToId?: string;
 }
