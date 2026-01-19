@@ -8,6 +8,9 @@ import { PrismaModule } from './config/prisma.module';
 // Auth module
 import { AuthModule } from './modules/auth/auth.module';
 
+// Health module
+import { HealthModule } from './modules/health/health.module';
+
 // CRM Modules
 import { CompaniesModule } from './modules/companies/companies.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
@@ -44,6 +47,9 @@ import { ReportsModule } from './modules/reports/reports.module';
 
         // Auth module
         AuthModule,
+
+        // Health module
+        HealthModule,
 
         // CRM Modules
         CompaniesModule,

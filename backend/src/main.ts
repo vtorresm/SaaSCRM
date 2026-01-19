@@ -6,9 +6,12 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { WinstonLogger } from './config/winston.logger';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, {
+        logger: new WinstonLogger(),
+    });
     const configService = app.get(ConfigService);
 
     // Global prefix for API routes
