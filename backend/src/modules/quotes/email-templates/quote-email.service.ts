@@ -42,7 +42,7 @@ export class QuoteEmailService {
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #2c3e50;">Friendly Reminder</h2>
             <p>Dear Customer,</p>
-            <p>This is a friendly reminder about quote ${quote.quoteNumber} that was sent to you on ${new Date(quote.sentAt).toLocaleDateString()}.</p>
+            <p>This is a friendly reminder about quote ${quote.quoteNumber} that was sent to you on ${quote.sentAt ? new Date(quote.sentAt).toLocaleDateString() : 'N/A'}.</p>
             <a href="${quoteUrl}" style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 5px; margin: 15px 0;">View Quote</a>
             <p>Quote Summary:</p>
             <ul>
@@ -55,7 +55,7 @@ export class QuoteEmailService {
             <p style="color: #7f8c8d; font-size: 0.9em;">This is an automated email. Please do not reply.</p>
           </div>
         `,
-                text: `Reminder: Quote ${quote.quoteNumber} from ${quote.client.name}\n\nDear Customer,\n\nThis is a friendly reminder about quote ${quote.quoteNumber} that was sent to you on ${new Date(quote.sentAt).toLocaleDateString()}.\n\nYou can view it at: ${quoteUrl}\n\nQuote Summary:\n- Quote Number: ${quote.quoteNumber}\n- Title: ${quote.title}\n- Total Amount: $${quote.totalAmount.toFixed(2)}\n- Valid Until: ${quote.validUntil ? new Date(quote.validUntil).toLocaleDateString() : 'N/A'}\n\nPlease let us know if you have any questions.`
+                text: `Reminder: Quote ${quote.quoteNumber} from ${quote.client.name}\n\nDear Customer,\n\nThis is a friendly reminder about quote ${quote.quoteNumber} that was sent to you on ${quote.sentAt ? new Date(quote.sentAt).toLocaleDateString() : 'N/A'}.\n\nYou can view it at: ${quoteUrl}\n\nQuote Summary:\n- Quote Number: ${quote.quoteNumber}\n- Title: ${quote.title}\n- Total Amount: $${quote.totalAmount.toFixed(2)}\n- Valid Until: ${quote.validUntil ? new Date(quote.validUntil).toLocaleDateString() : 'N/A'}\n\nPlease let us know if you have any questions.`
             },
             followup: {
                 subject: `Follow-up: Quote ${quote.quoteNumber} from ${quote.client.name}`,
@@ -63,7 +63,7 @@ export class QuoteEmailService {
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #2c3e50;">Follow-up on Your Quote</h2>
             <p>Dear Customer,</p>
-            <p>We wanted to follow up regarding quote ${quote.quoteNumber} that we sent you on ${new Date(quote.sentAt).toLocaleDateString()}.</p>
+            <p>We wanted to follow up regarding quote ${quote.quoteNumber} that we sent you on ${quote.sentAt ? new Date(quote.sentAt).toLocaleDateString() : 'N/A'}.</p>
             <a href="${quoteUrl}" style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 5px; margin: 15px 0;">View Quote</a>
             <p>Quote Summary:</p>
             <ul>
@@ -76,7 +76,7 @@ export class QuoteEmailService {
             <p style="color: #7f8c8d; font-size: 0.9em;">This is an automated email. Please do not reply.</p>
           </div>
         `,
-                text: `Follow-up: Quote ${quote.quoteNumber} from ${quote.client.name}\n\nDear Customer,\n\nWe wanted to follow up regarding quote ${quote.quoteNumber} that we sent you on ${new Date(quote.sentAt).toLocaleDateString()}.\n\nYou can view it at: ${quoteUrl}\n\nQuote Summary:\n- Quote Number: ${quote.quoteNumber}\n- Title: ${quote.title}\n- Total Amount: $${quote.totalAmount.toFixed(2)}\n- Valid Until: ${quote.validUntil ? new Date(quote.validUntil).toLocaleDateString() : 'N/A'}\n\nWe'd be happy to answer any questions you may have or discuss the quote further.`
+                text: `Follow-up: Quote ${quote.quoteNumber} from ${quote.client.name}\n\nDear Customer,\n\nWe wanted to follow up regarding quote ${quote.quoteNumber} that we sent you on ${quote.sentAt ? new Date(quote.sentAt).toLocaleDateString() : 'N/A'}.\n\nYou can view it at: ${quoteUrl}\n\nQuote Summary:\n- Quote Number: ${quote.quoteNumber}\n- Title: ${quote.title}\n- Total Amount: $${quote.totalAmount.toFixed(2)}\n- Valid Until: ${quote.validUntil ? new Date(quote.validUntil).toLocaleDateString() : 'N/A'}\n\nWe'd be happy to answer any questions you may have or discuss the quote further.`
             }
         };
 
