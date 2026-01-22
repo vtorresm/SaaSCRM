@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CompaniesService } from '../companies/companies.service';
-import { ContactsService } from '../contacts/contacts.service';
-import { QuotesService } from '../quotes/quotes.service';
-import { UsersService } from '../users/users.service';
+import { CompaniesService } from "@/modules/companies/companies.service";
+import { ContactsService } from "@/modules/contacts/contacts.service";
+import { QuotesService } from "@/modules/quotes/quotes.service";
+import { UsersService } from "@/modules/users/users.service";
 
 @Injectable()
 export class DashboardService {
