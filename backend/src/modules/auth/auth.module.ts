@@ -4,11 +4,11 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { LocalStrategy } from './strategies/local.strategy';
-import { GoogleStrategy } from './strategies/google.strategy';
-import { LinkedInStrategy } from './strategies/linkedin.strategy';
+import { AuthService } from "@/modules/auth/auth.service";
+import { JwtStrategy } from "@/modules/auth/strategies/jwt.strategy";
+import { LocalStrategy } from "@/modules/auth/strategies/local.strategy";
+import { GoogleStrategy } from "@/modules/auth/strategies/google.strategy";
+import { LinkedInStrategy } from "@/modules/auth/strategies/linkedin.strategy";
 
 @Module({
     imports: [

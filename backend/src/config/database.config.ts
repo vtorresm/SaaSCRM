@@ -4,7 +4,7 @@ export const DatabaseConfig = registerAs('database', () => ({
     url: process.env.DATABASE_URL,
     testUrl: process.env.DATABASE_URL_TEST,
     host: process.env.DATABASE_HOST || 'localhost',
-    port: parseInt(process.env.DATABASE_PORT, 10) || 5432,
+    port: parseInt(process.env.DATABASE_PORT || '5432', 10),
     username: process.env.DATABASE_USERNAME || 'postgres',
     password: process.env.DATABASE_PASSWORD || 'password',
     database: process.env.DATABASE_NAME || 'sales_crm_dev',

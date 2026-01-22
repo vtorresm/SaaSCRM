@@ -13,14 +13,14 @@ import { Response } from 'express';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
-import { AuthService, AuthResponse } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { LocalAuthGuard } from './guards/local-auth.guard';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { AuthService, AuthResponse } from "@/modules/auth/auth.service";
+import { JwtAuthGuard } from "@/modules/auth/guards/jwt-auth.guard";
+import { LocalAuthGuard } from "@/modules/auth/guards/local-auth.guard";
+import { RegisterDto } from "@/modules/auth/dto/register.dto";
+import { LoginDto } from "@/modules/auth/dto/login.dto";
+import { RefreshTokenDto } from "@/modules/auth/dto/refresh-token.dto";
+import { ForgotPasswordDto } from "@/modules/auth/dto/forgot-password.dto";
+import { ResetPasswordDto } from "@/modules/auth/dto/reset-password.dto";
 
 @ApiTags('auth')
 @Controller('auth')
