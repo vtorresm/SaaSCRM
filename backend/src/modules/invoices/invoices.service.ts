@@ -52,7 +52,9 @@ export class InvoicesService {
             const unitPrice = Number(item.unitPrice);
 
             const discount = Number(item.discount ?? 0);
-            const taxRate = TAX_RATES[item.taxType] || Number(item.taxRate ?? defaultTaxRate);
+            const taxTypeKey = item.taxType || '';
+            const definedTaxRate = TAX_RATES[taxTypeKey];
+            const taxRate = definedTaxRate !== undefined ? definedTaxRate : Number(item.taxRate ?? defaultTaxRate);
             const order = Number(item.order ?? index);
 
             const lineSubtotal = quantity * unitPrice;
@@ -417,7 +419,7 @@ export class InvoicesService {
                 payments: true,
             },
         });
-        if (status === 'SENT') {
+        if (status === 'SENT' && updated.client.email) {
             try {
                 await this.emailService.sendInvoice(
                     { invoiceNumber: updated.invoiceNumber, totalAmount: updated.totalAmount },
