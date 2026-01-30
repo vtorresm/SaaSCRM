@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from "@/config/prisma.service";
+import { ContactStatus } from '@prisma/client';
 import { CreateContactDto } from "@/modules/contacts/dto/create-contact.dto";
 import { UpdateContactDto } from "@/modules/contacts/dto/update-contact.dto";
 
@@ -67,10 +68,10 @@ export class ContactsService {
         });
     }
 
-    async findByStatus(status: string) {
+    async findByStatus(status: ContactStatus) {
         return this.prisma.contact.findMany({
             where: {
-                status: status as any,
+                status,
                 deletedAt: null,
             },
         });

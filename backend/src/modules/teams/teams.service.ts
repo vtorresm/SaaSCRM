@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../config/prisma.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
@@ -70,10 +70,9 @@ export class TeamsService {
     }
 
     async addUserToTeam(teamId: string, addUserToTeamDto: AddUserToTeamDto) {
-        // Check if user exists
         const user = await this.usersService.findOne(addUserToTeamDto.userId);
         if (!user) {
-            throw new Error('User not found');
+            throw new NotFoundException('Usuario no encontrado');
         }
 
         // Check if user is already in team
@@ -85,7 +84,7 @@ export class TeamsService {
         });
 
         if (existingMember) {
-            throw new Error('User already in team');
+            throw new BadRequestException('El usuario ya pertenece a este equipo');
         }
 
         return this.prisma.userTeam.create({

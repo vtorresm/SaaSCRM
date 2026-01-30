@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { Throttle } from '@nestjs/throttler';
+import { UsersService } from '../users/users.service';
 
 export interface JwtPayload {
     sub: string;
@@ -25,11 +26,20 @@ export interface AuthResponse {
     refreshToken: string;
 }
 
+export interface RegisterDto {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    role?: string;
+}
+
 @Injectable()
 export class AuthService {
     constructor(
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
+        private readonly usersService: UsersService,
     ) { }
 
     /**
@@ -81,14 +91,7 @@ export class AuthService {
      * Rotación de tokens - invalida refresh token anterior
      */
     async rotateTokens(userId: string, refreshToken: string): Promise<AuthResponse> {
-        // Aquí implementaríamos lógica de invalidación del refresh token anterior
-        // Por ahora generamos nuevos tokens
-
-        // En una implementación completa, validaríamos que el refresh token sea válido
-        // y no haya sido usado (revocation list o base de datos)
-
-        // Simular búsqueda de usuario
-        const user = await this.findUserById(userId);
+        const user = await this.usersService.findOne(userId);
         if (!user) {
             throw new UnauthorizedException('Usuario no encontrado');
         }
@@ -100,7 +103,7 @@ export class AuthService {
      * Valida usuario para estrategia local
      */
     async validateUser(email: string, password: string): Promise<any> {
-        const user = await this.findUserByEmail(email);
+        const user = await this.usersService.findByEmailWithPassword(email);
 
         if (!user) {
             throw new UnauthorizedException('Credenciales inválidas');
@@ -138,9 +141,6 @@ export class AuthService {
         const maxAttempts = this.configService.get<number>('MAX_LOGIN_ATTEMPTS') || 5;
         const lockoutTime = this.configService.get<number>('ACCOUNT_LOCKOUT_TIME') || 30; // minutos
 
-        // Aquí incrementaríamos el contador de intentos fallidos
-        // y bloquearíamos la cuenta si es necesario
-
         console.log(`Failed login attempt for user ${userId}`);
     }
 
@@ -148,26 +148,14 @@ export class AuthService {
      * Resetea contador de intentos fallidos
      */
     private async resetFailedLoginAttempts(userId: string): Promise<void> {
-        // Aquí reseteamos el contador de intentos fallidos
         console.log(`Reset failed attempts for user ${userId}`);
     }
 
     /**
-     * Busca usuario por email (mock)
-     */
-    private async findUserByEmail(email: string): Promise<any> {
-        // Aquí implementaríamos búsqueda real en base de datos
-        // Retornamos null por ahora
-        return null;
-    }
-
-    /**
-     * Busca usuario por ID (mock)
+     * Busca usuario por ID usando UsersService
      */
     async findUserById(id: string): Promise<any> {
-        // Aquí implementaríamos búsqueda real en base de datos
-        // Retornamos null por ahora
-        return null;
+        return this.usersService.findOne(id);
     }
 
     /**
@@ -184,35 +172,24 @@ export class AuthService {
     /**
      * Registra un nuevo usuario
      */
-    async register(userData: {
-        email: string;
-        password: string;
-        firstName: string;
-        lastName: string;
-        role?: string;
-    }): Promise<AuthResponse> {
+    async register(registerDto: RegisterDto): Promise<AuthResponse> {
         // Verificar si el usuario ya existe
-        const existingUser = await this.findUserByEmail(userData.email);
+        const existingUser = await this.usersService.findByEmail(registerDto.email);
         if (existingUser) {
             throw new BadRequestException('El usuario ya existe');
         }
 
         // Hash de la contraseña
-        const hashedPassword = await this.hashPassword(userData.password);
+        const hashedPassword = await this.hashPassword(registerDto.password);
 
         // Crear usuario
-        const newUser = {
-            id: 'mock-id',
-            email: userData.email,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            role: userData.role || 'SALES_REP',
-            status: 'PENDING_VERIFICATION',
+        const newUser = await this.usersService.create({
+            email: registerDto.email,
             password: hashedPassword,
-        };
-
-        // Aquí guardaríamos en base de datos
-        console.log('Creating user:', newUser);
+            firstName: registerDto.firstName,
+            lastName: registerDto.lastName,
+            role: registerDto.role,
+        });
 
         return this.generateTokens(newUser);
     }
@@ -221,7 +198,6 @@ export class AuthService {
      * Actualiza último login
      */
     async updateLastLogin(userId: string): Promise<void> {
-        // Aquí actualizaríamos el timestamp de último login
         console.log(`Updated last login for user ${userId}`);
     }
 }

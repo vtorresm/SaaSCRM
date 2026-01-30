@@ -6,6 +6,7 @@ import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { UpdateInvoiceStatusDto } from './dto/update-invoice-status.dto';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { CreateInvoiceFromQuoteDto } from './dto/create-invoice-from-quote.dto';
+import { InvoiceStatus } from '@prisma/client';
 
 @ApiTags('invoices')
 @Controller('invoices')
@@ -129,34 +130,34 @@ export class InvoicesController {
     @ApiOperation({ summary: 'Send invoice to client' })
     @ApiResponse({ status: 200, description: 'Invoice sent successfully' })
     async sendInvoice(@Param('id') id: string) {
-        return this.invoicesService.updateStatus(id, 'SENT' as any);
+        return this.invoicesService.updateStatus(id, InvoiceStatus.SENT);
     }
 
     @Post(':id/mark-paid')
     @ApiOperation({ summary: 'Mark invoice as paid' })
     @ApiResponse({ status: 200, description: 'Invoice marked as paid' })
     async markAsPaid(@Param('id') id: string) {
-        return this.invoicesService.updateStatus(id, 'PAID' as any);
+        return this.invoicesService.updateStatus(id, InvoiceStatus.PAID);
     }
 
     @Post(':id/mark-overdue')
     @ApiOperation({ summary: 'Mark invoice as overdue' })
     @ApiResponse({ status: 200, description: 'Invoice marked as overdue' })
     async markAsOverdue(@Param('id') id: string) {
-        return this.invoicesService.updateStatus(id, 'OVERDUE' as any);
+        return this.invoicesService.updateStatus(id, InvoiceStatus.OVERDUE);
     }
 
     @Post(':id/cancel')
     @ApiOperation({ summary: 'Cancel invoice' })
     @ApiResponse({ status: 200, description: 'Invoice cancelled successfully' })
     async cancel(@Param('id') id: string) {
-        return this.invoicesService.updateStatus(id, 'CANCELLED' as any);
+        return this.invoicesService.updateStatus(id, InvoiceStatus.CANCELLED);
     }
 
     @Post(':id/refund')
     @ApiOperation({ summary: 'Refund invoice' })
     @ApiResponse({ status: 200, description: 'Invoice refunded successfully' })
     async refund(@Param('id') id: string) {
-        return this.invoicesService.updateStatus(id, 'REFUNDED' as any);
+        return this.invoicesService.updateStatus(id, InvoiceStatus.REFUNDED);
     }
 }

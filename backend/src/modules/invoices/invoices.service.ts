@@ -77,11 +77,11 @@ export class InvoicesService {
             };
         });
 
-        return { 
-            items, 
-            subtotal, 
-            discountAmount, 
-            taxAmount, 
+        return {
+            items,
+            subtotal,
+            discountAmount,
+            taxAmount,
             totalAmount,
             dueAmount: totalAmount // Initially, full amount is due
         };
@@ -419,7 +419,10 @@ export class InvoicesService {
         });
         if (status === 'SENT') {
             try {
-                await this.emailService.sendInvoice(id, updated.client.email);
+                await this.emailService.sendInvoice(
+                    { invoiceNumber: updated.invoiceNumber, totalAmount: updated.totalAmount },
+                    updated.client.email
+                );
             } catch (error) {
                 console.error('Failed to send invoice email:', error);
             }
@@ -582,9 +585,9 @@ export class InvoicesService {
         });
 
         const outstandingAmount = await this.prisma.invoice.aggregate({
-            where: { 
+            where: {
                 status: { in: ['SENT', 'OVERDUE'] },
-                deletedAt: null 
+                deletedAt: null
             },
             _sum: { dueAmount: true },
         });

@@ -1,200 +1,160 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../config/prisma.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
-import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
-import { AuthService } from '../auth/auth.service';
-import { CompaniesService } from '../companies/companies.service';
+import { User, UserStatus } from '@prisma/client';
+
+export interface CreateUserDto {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    role?: string;
+    companyId?: string;
+}
+
+export interface UpdateUserDto {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    role?: string;
+    status?: UserStatus;
+    companyId?: string;
+}
+
+export interface UserResponse {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    status: string;
+    companyId?: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
 
 @Injectable()
 export class UsersService {
-    constructor(
-        private prisma: PrismaService,
-        private authService: AuthService,
-        private companiesService: CompaniesService,
-    ) { }
+    constructor(private prisma: PrismaService) { }
 
-    async create(createUserDto: CreateUserDto) {
-        // Hash password before creating user
-        const hashedPassword = await this.authService.hashPassword(createUserDto.password);
-
-        return this.prisma.user.create({
+    async create(createUserDto: CreateUserDto): Promise<UserResponse> {
+        const user = await this.prisma.user.create({
             data: {
-                ...createUserDto,
-                password: hashedPassword,
+                email: createUserDto.email,
+                password: createUserDto.password,
+                firstName: createUserDto.firstName,
+                lastName: createUserDto.lastName,
+                role: (createUserDto.role as any) || 'SALES_REP',
+                companyId: createUserDto.companyId,
                 status: 'ACTIVE',
             },
-            include: {
-                company: true,
-            },
+        });
+
+        return this.toUserResponse(user);
+    }
+
+    async findAll(): Promise<UserResponse[]> {
+        const users = await this.prisma.user.findMany({
+            where: { deletedAt: null },
+            include: { company: true },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return users.map(user => this.toUserResponse(user));
+    }
+
+    async findOne(id: string): Promise<UserResponse | null> {
+        const user = await this.prisma.user.findFirst({
+            where: { id, deletedAt: null },
+            include: { company: true, teams: true },
+        });
+
+        if (!user) return null;
+        return this.toUserResponse(user);
+    }
+
+    async findByEmail(email: string): Promise<UserResponse | null> {
+        const user = await this.prisma.user.findFirst({
+            where: { email, deletedAt: null },
+            include: { company: true, teams: true },
+        });
+
+        if (!user) return null;
+        return this.toUserResponse(user);
+    }
+
+    async findByEmailWithPassword(email: string): Promise<(User & { company?: any }) | null> {
+        return this.prisma.user.findFirst({
+            where: { email, deletedAt: null },
+            include: { company: true },
         });
     }
 
-    async findAll() {
-        return this.prisma.user.findMany({
-            where: {
-                deletedAt: null,
-            },
-            include: {
-                company: true,
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
+    async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponse> {
+        const user = await this.prisma.user.update({
+            where: { id },
+            data: updateUserDto as any,
+            include: { company: true },
         });
+
+        return this.toUserResponse(user);
     }
 
-    async findOne(id: string) {
-        return this.prisma.user.findUnique({
-            where: {
-                id,
-                deletedAt: null,
-            },
-            include: {
-                company: true,
-                teams: true,
-                assignedQuotes: true,
-                createdQuotes: true,
-            },
+    async remove(id: string): Promise<UserResponse> {
+        const user = await this.prisma.user.update({
+            where: { id },
+            data: { deletedAt: new Date() },
         });
+
+        return this.toUserResponse(user);
     }
 
-    async update(id: string, updateUserDto: UpdateUserDto) {
-        return this.prisma.user.update({
-            where: {
-                id,
-            },
-            data: updateUserDto,
-            include: {
-                company: true,
-            },
+    async findByCompany(companyId: string): Promise<UserResponse[]> {
+        const users = await this.prisma.user.findMany({
+            where: { companyId, deletedAt: null },
+            include: { teams: true },
         });
+
+        return users.map(user => this.toUserResponse(user));
     }
 
-    async remove(id: string) {
-        return this.prisma.user.update({
-            where: {
-                id,
-            },
-            data: {
-                deletedAt: new Date(),
-            },
+    async findByRole(role: string): Promise<UserResponse[]> {
+        const users = await this.prisma.user.findMany({
+            where: { role: role as any, deletedAt: null },
+            include: { company: true },
         });
+
+        return users.map(user => this.toUserResponse(user));
     }
 
-    async findByEmail(email: string) {
-        return this.prisma.user.findUnique({
-            where: {
-                email,
-                deletedAt: null,
-            },
-            include: {
-                company: true,
-                teams: true,
-            },
-        });
-    }
-
-    async findByCompany(companyId: string) {
-        return this.prisma.user.findMany({
-            where: {
-                companyId,
-                deletedAt: null,
-            },
-            include: {
-                teams: true,
-            },
-        });
-    }
-
-    async findByRole(role: string) {
-        return this.prisma.user.findMany({
-            where: {
-                role: role as any,
-                deletedAt: null,
-            },
-            include: {
-                company: true,
-            },
-        });
-    }
-
-    async search(query: string) {
-        return this.prisma.user.findMany({
+    async search(query: string): Promise<UserResponse[]> {
+        const users = await this.prisma.user.findMany({
             where: {
                 OR: [
-                    {
-                        firstName: {
-                            contains: query,
-                            mode: 'insensitive',
-                        },
-                    },
-                    {
-                        lastName: {
-                            contains: query,
-                            mode: 'insensitive',
-                        },
-                    },
-                    {
-                        email: {
-                            contains: query,
-                            mode: 'insensitive',
-                        },
-                    },
+                    { firstName: { contains: query, mode: 'insensitive' } },
+                    { lastName: { contains: query, mode: 'insensitive' } },
+                    { email: { contains: query, mode: 'insensitive' } },
                 ],
                 deletedAt: null,
             },
-            include: {
-                company: true,
-            },
+            include: { company: true },
         });
-    }
 
-    async updateProfile(id: string, updateUserProfileDto: UpdateUserProfileDto) {
-        return this.prisma.user.update({
-            where: {
-                id,
-            },
-            data: updateUserProfileDto,
-        });
-    }
-
-    async updatePassword(id: string, updateUserPasswordDto: UpdateUserPasswordDto) {
-        const hashedPassword = await this.authService.hashPassword(updateUserPasswordDto.newPassword);
-
-        return this.prisma.user.update({
-            where: {
-                id,
-            },
-            data: {
-                password: hashedPassword,
-            },
-        });
+        return users.map(user => this.toUserResponse(user));
     }
 
     async getUserStats() {
         const totalUsers = await this.prisma.user.count({
-            where: {
-                deletedAt: null,
-            },
+            where: { deletedAt: null },
         });
 
         const usersByRole = await this.prisma.user.groupBy({
             by: ['role'],
-            _count: {
-                id: true,
-            },
-            where: {
-                deletedAt: null,
-            },
+            _count: { id: true },
+            where: { deletedAt: null },
         });
 
         const activeUsers = await this.prisma.user.count({
-            where: {
-                status: 'ACTIVE',
-                deletedAt: null,
-            },
+            where: { status: 'ACTIVE', deletedAt: null },
         });
 
         return {
@@ -208,13 +168,17 @@ export class UsersService {
         };
     }
 
-    async getUserActivity(userId: string) {
-        const user = await this.findOne(userId);
-
+    private toUserResponse(user: any): UserResponse {
         return {
-            user,
-            recentQuotes: user.createdQuotes.slice(0, 5),
-            assignedQuotes: user.assignedQuotes.slice(0, 5),
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+            status: user.status,
+            companyId: user.companyId,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
         };
     }
 }

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/
 import { ContactsService } from "@/modules/contacts/contacts.service";
 import { CreateContactDto } from "@/modules/contacts/dto/create-contact.dto";
 import { UpdateContactDto } from "@/modules/contacts/dto/update-contact.dto";
+import { ContactStatus } from '@prisma/client';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('contacts')
@@ -54,7 +55,7 @@ export class ContactsController {
     @Get('status/:status')
     @ApiOperation({ summary: 'Get contacts by status' })
     @ApiResponse({ status: 200, description: 'List of contacts with specific status' })
-    async findByStatus(@Param('status') status: string) {
+    async findByStatus(@Param('status') status: ContactStatus) {
         return this.contactsService.findByStatus(status);
     }
 
