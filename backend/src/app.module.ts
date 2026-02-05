@@ -21,6 +21,10 @@ import { UsersModule } from './modules/users/users.module';
 import { TeamsModule } from './modules/teams/teams.module';
 import { EmailModule } from './modules/email/email.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { SettingsModule } from './modules/settings/settings.module';
 
 @Module({
     imports: [
@@ -57,9 +61,15 @@ import { ReportsModule } from './modules/reports/reports.module';
         DashboardModule,
         QuotesModule,
         InvoicesModule,
+        ProjectsModule,
         UsersModule,
         TeamsModule,
         ReportsModule,
+
+        // System Modules
+        AuditModule,
+        NotificationsModule,
+        SettingsModule,
     ],
     controllers: [],
     providers: [],

@@ -9,7 +9,7 @@ SaaS CRM completo para la gestión de ventas de software, desarrollado con tecno
 ### Backend
 - **TypeScript 5.x** con **Node.js 20/22 LTS**
 - **NestJS 10.x** - Framework modular y escalable
-- **Prisma 5.x** - ORM type-safe con PostgreSQL 16.x
+- **Prisma 6.x** - ORM type-safe con PostgreSQL 16.x
 - **JWT** para autenticación con refresh tokens
 - **Passport.js** para OAuth (Google, LinkedIn)
 - **Nodemailer** para notificaciones por email
@@ -53,7 +53,12 @@ backend/src/
 │   ├── invoices/         # Invoice system
 │   ├── dashboard/        # Dashboard & metrics
 │   ├── teams/            # Team management
-│   └── audit/            # Audit & compliance
+│   ├── reports/          # Reporting system
+│   ├── email/            # Email notifications
+│   ├── health/           # Health checks
+│   ├── audit/            # Audit & compliance
+│   ├── notifications/    # Notification system
+│   └── settings/         # System configuration
 ```
 
 ## 📋 Roadmap de Desarrollo
@@ -87,7 +92,7 @@ backend/src/
 ## 🚀 Instalación y Configuración
 
 ### Prerrequisitos
-- **Docker Desktop** (强烈推荐) o Docker Engine + Docker Compose
+- **Docker Desktop** (recomendado) o Docker Engine + Docker Compose
 - Node.js 18+ 
 - npm, yarn o pnpm
 
@@ -242,6 +247,8 @@ EMAIL_PORT=1025
 - **Invoices**: Facturación con items y pagos
 - **Teams**: Equipos de trabajo
 - **AuditLog**: Registro de auditoría para compliance
+- **Notifications**: Sistema de notificaciones
+- **SystemSettings**: Configuración del sistema
 
 ### Características de Seguridad
 - Soft deletes con `deletedAt`
@@ -393,7 +400,7 @@ npm run start:dev    # Desarrollo con hot reload
 npm run start:prod   # Producción
 npm run db:migrate   # Ejecutar migraciones
 npm run db:seed      # Poblar base de datos con datos de prueba
-npm run db:reset     # Reset completo de la base de datos
+npm run db:studio    # Abrir Prisma Studio (GUI de BD)
 ```
 
 ### Docker Operations
@@ -454,12 +461,20 @@ docker-compose down -v --remove-orphans
 - Pruebas automatizadas completas para todos los servicios
 - Documentación completa de API con Swagger
 
+### ✅ Sprint 5 - Completado
+- Módulo de proyectos completo (CRUD, tareas, time entries)
+- Sistema de auditoría (AuditLog con filtros y estadísticas)
+- Sistema de notificaciones (in-app, email, push)
+- Configuración del sistema (SystemSettings con upsert)
+- Seed de datos de prueba para desarrollo
+- Scripts de setup y reset de base de datos
+
 ### 🔄 Próximos Pasos
-1. Iniciar Sprint 5 (Advanced Features)
-2. Implementar sistema de auditoría completo
-3. Desarrollar sistema de notificaciones
-4. Crear sistema de facturación avanzado
-5. Implementar integración con sistemas externos
+1. Desarrollo del frontend (Next.js 14)
+2. Integración con pasarelas de pago (Stripe/PayPal)
+3. Generación avanzada de PDFs
+4. Sistema de notificaciones en tiempo real (WebSockets)
+5. Dashboard avanzado con gráficos
 
 ## 🛠️ Troubleshooting
 
